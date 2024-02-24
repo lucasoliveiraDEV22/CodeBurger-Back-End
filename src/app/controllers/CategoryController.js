@@ -47,6 +47,42 @@ class CategoryController {
 
     res.json(category)
   }
+
+  async update(req, res) {
+    const schema = Yup.object().shape({
+      name: Yup.string(),
+    })
+
+    try {
+      await schema.validateSync(req.body, { abortEarly: false })
+    } catch (err) {
+      return res.status(400).json({ error: err.errors })
+    }
+
+    const { admin: isAdmin } = await User.findByPk(req.userId)
+
+    if (!isAdmin) {
+      res.status(401).json()
+    }
+
+    const { name } = req.body
+
+    const { id } = req.params
+
+    const categoryExists = await Category.findByPk(id)
+
+    if (!categoryExists) {
+      res.status(401).json({ error: 'Make sure your category id is correct!' })
+    }
+
+    let path
+    if (req.file) {
+      path = req.file.filename
+    }
+
+    await Category.update({ name, path }, { where: { id } })
+    res.status(200).json({ id, name })
+  }
 }
 
 export default new CategoryController()
