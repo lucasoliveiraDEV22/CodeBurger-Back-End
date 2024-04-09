@@ -22,7 +22,10 @@ class CategoryController {
 
     const { name } = req.body
 
-    const { filename: path } = req.file
+    let path = null
+    if (req.file) {
+      path = req.file.filename
+    }
 
     const categoryExists = await Category.findOne({
       where: {
@@ -36,10 +39,6 @@ class CategoryController {
 
     const { id } = await Category.create({ name, path })
     res.json({ id, name })
-  }
-
-  catch(err) {
-    console.log(err)
   }
 
   async index(req, res) {
@@ -66,7 +65,6 @@ class CategoryController {
     }
 
     const { name } = req.body
-
     const { id } = req.params
 
     const categoryExists = await Category.findByPk(id)
@@ -75,7 +73,7 @@ class CategoryController {
       res.status(401).json({ error: 'Make sure your category id is correct!' })
     }
 
-    let path
+    let path = null
     if (req.file) {
       path = req.file.filename
     }
